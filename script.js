@@ -94,15 +94,6 @@ searchButton.addEventListener("click", async function () {
   }
 });
 
-// ketika tombol showdetails diclick
-document.addEventListener("click", async function (e) {
-  if (e.target.classList.contains("modal-detail-button")) {
-    const imdbid = e.target.dataset.imdbid;
-    const movieDetail = await getMovieDetail(imdbid);
-    updateUIDetail(movieDetail);
-  }
-});
-
 function getMovieDetail(imdbid) {
   return fetch("http://www.omdbapi.com/?apikey=20aeda12&i=" + imdbid)
     .then((response) => response.json())
@@ -138,19 +129,47 @@ function updateUI(movies) {
 }
 function showCards(m) {
   return `
-        <div class="col-md-4 my-5">
-          <div class="card">
-            <img src="${m.Poster}" class="card-img-top" alt="" />
-            <div class="card-body">
-              <h5 class="card-title">${m.Title}</h5>
-              <h6 class="card-subtitle mb-2 text-body-secondary">${m.Year}</h6>
-              <a href="#" class="btn btn-primary modal-detail-button bg-dark" data-bs-toggle="modal"
-                    data-bs-target="#moviesDetailModal" data-imdbid="${m.imdbID}">Show Details</a>
-            </div>
-          </div>
+    <div class="col-md-4 my-5">
+      <div class="card">
+        <img src="${m.Poster}" class="card-img-top" alt="" />
+        <div class="card-body">
+          <h5 class="card-title">${m.Title}</h5>
+          <h6 class="card-subtitle mb-2 text-body-secondary">${m.Year}</h6>
+          <a href="#" class="btn btn-primary modal-detail-button bg-dark" data-bs-toggle="modal"
+                data-bs-target="#moviesDetailModal" data-imdbid="${
+                  m.imdbID
+                }">Show Details</a>
+          <button class="btn btn-success save-button" data-movie='${JSON.stringify(
+            m
+          )}'>Save</button>
         </div>
-      `;
+      </div>
+    </div>
+  `;
 }
+
+document.addEventListener("click", function (e) {
+  if (e.target.classList.contains("save-button")) {
+    const movieData = JSON.parse(e.target.dataset.movie);
+    saveMovie(movieData);
+  }
+});
+
+function saveMovie(movie) {
+  const savedMovies = JSON.parse(localStorage.getItem("movies")) || [];
+
+  if (savedMovies.some((m) => m.imdbID === movie.imdbID)) {
+    alert("Movie sudah ada di list!");
+    return;
+  }
+
+  savedMovies.push(movie);
+  localStorage.setItem("movies", JSON.stringify(savedMovies));
+  alert(`${movie.Title} Ditambahkan kedalam list!`);
+}
+
+// Stop
+
 function showMovieDetail(m) {
   return `
             <div class="container-fluid">
